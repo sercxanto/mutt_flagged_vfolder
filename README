@@ -1,6 +1,6 @@
 mutt_flagged_vfolder
 
-vFolder in mutt with containing all flagged messages in ~/Maildir
+vFolder in mutt containing all flagged messages from ~/Maildir
 
 Personally I often mark messages which need to be worked on later (effort > 2 minutes in GTD speak) with a flag. As flags are preserved when syncronizing Maildirs over IMAP with offlineimap I can mark them both over IMAP client or locally with mutt.
 
