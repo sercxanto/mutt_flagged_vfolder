@@ -45,9 +45,8 @@ def parseMessageId(file):
 
 def parseMaildir(filename):
     '''Returns the maildir folder for a given file in a maildir'''
-    maildir = os.path.dirname(filename).rstrip("/cur")
-    maildir = maildir.rstrip("/new")
-    return maildir
+    (head,tail) = os.path.split(os.path.dirname(filename))
+    return head
 
 
 def writeMuttCmdFile(filename, maildir, msgId):
