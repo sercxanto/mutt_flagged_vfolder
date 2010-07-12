@@ -58,7 +58,12 @@ def writeMuttCmdFile(filename, maildir, msgId):
     except:
 	return False
 
-    cmd = "push \"<change-folder> " + maildir + "<enter>/~i " + msgId + "<enter>\""
+    cmd = "push \"<change-folder> " + maildir + "<enter>/~i "
+    # Helps if matching something like 123@[1.2.3.4]
+    regex = re.escape(msgId)
+    # Backslashes must be quoted for a regular expression in initialization command
+    regex = regex.replace("\\","\\\\\\\\")
+    cmd += regex + "<enter>\""
     file.write(cmd)
     file.close()
     return True
