@@ -61,8 +61,16 @@ def writeMuttCmdFile(filename, maildir, msgId):
     cmd = "push \"<change-folder> " + maildir + "<enter>/~i "
     # Helps if matching something like 123@[1.2.3.4]
     regex = re.escape(msgId)
-    # Backslashes must be quoted for a regular expression in initialization command
+    # Replace dollar sign "$" with ".+" as mutt has problems with push
+    # commands and a dollar sign followed with a non numeric value e.g. like "$u".
+    # This seems to reference a variable and cannot be escaped apparently.
+    # Something like "$1" does not oppose problems when escaped.
+    regex = regex.replace("\\$",".+")
+    # According to mutt manual "4.1 Regular Expressions" backslashes must
+    # be quoted for a regular expression in initialization command
     regex = regex.replace("\\","\\\\\\\\")
+    # For some unknown reason "=" must not be escaped twice
+    regex = regex.replace("\\\\=","=")
     cmd += regex + "<enter>\""
     file.write(cmd)
     file.close()
