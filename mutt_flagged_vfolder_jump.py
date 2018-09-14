@@ -34,12 +34,12 @@ def parseMessageId(file):
     msgId = ""
     for line in file:
        # Stop after Header
-	if len(line) < 2:
-	    break
-	result = prog.search(line)
-	if type(result) != types.NoneType and len(result.groups()) == 1:
-	    msgId = result.groups()[0]
-	    break
+        if len(line) < 2:
+            break
+        result = prog.search(line)
+        if type(result) != types.NoneType and len(result.groups()) == 1:
+            msgId = result.groups()[0]
+            break
     return msgId.strip("<>")
 
 
@@ -54,9 +54,9 @@ def writeMuttCmdFile(filename, maildir, msgId):
        mutt to change to the given maildir and search there for the given
        message id. Returns true on success, otherwise false.'''
     try:
-	file = open(filename, "w")
+        file = open(filename, "w")
     except:
-	return False
+        return False
 
     cmd = "push \"<change-folder> " + maildir + "<enter>/~i "
     # Helps if matching something like 123@[1.2.3.4]
@@ -80,9 +80,9 @@ def writeMuttCmdFile(filename, maildir, msgId):
 ########### MAIN PROGRAM #############
 
 parser = optparse.OptionParser(
-	usage="%prog [options] vfolder cmdFile",
-	version="%prog " + VERSIONSTRING + os.linesep +
-	"Copyright (C) 2010 Georg Lutz <georg AT NOSPAM georglutz DOT de")
+    usage="%prog [options] vfolder cmdFile",
+    version="%prog " + VERSIONSTRING + os.linesep +
+    "Copyright (C) 2010 Georg Lutz <georg AT NOSPAM georglutz DOT de")
 
 
 (options, args) = parser.parse_args()
@@ -109,33 +109,33 @@ if len(msgId) > 0:
     found = False
     cmdFileWritten = False
     for entry in os.listdir(os.path.join(optVFolder, "cur")):
-	entry = os.path.join(optVFolder, "cur", entry)
-	if os.path.islink(entry):
-	    file = None
-	    try:
-		file = open(entry, "r")
-	    except:
-		print "Could not open " + entry
-	    if type(file) != types.NoneType:
-		msgId2 = parseMessageId(file)
-		file.close()
-		if msgId == msgId2:
-		    found = True
-		    sourcefile = os.path.realpath(entry)
-		    maildir = parseMaildir(sourcefile)
-		    cmdFileWritten = writeMuttCmdFile(optCmdFile, maildir, msgId)
-		    if not cmdFileWritten:
-			print "Could not write to file %s" % optCmdFile
-		    break
+        entry = os.path.join(optVFolder, "cur", entry)
+        if os.path.islink(entry):
+            file = None
+            try:
+                file = open(entry, "r")
+            except:
+                print "Could not open " + entry
+            if type(file) != types.NoneType:
+                msgId2 = parseMessageId(file)
+                file.close()
+                if msgId == msgId2:
+                    found = True
+                    sourcefile = os.path.realpath(entry)
+                    maildir = parseMaildir(sourcefile)
+                    cmdFileWritten = writeMuttCmdFile(optCmdFile, maildir, msgId)
+                    if not cmdFileWritten:
+                        print "Could not write to file %s" % optCmdFile
+                    break
 
     if found and cmdFileWritten:
-	sys.exit(0)
+        sys.exit(0)
     else:
-	if not found:
-	    print "Could not find given email"
-	# mutt waits for key press if external command returns with code != 0
+        if not found:
+            print "Could not find given email"
+        # mutt waits for key press if external command returns with code != 0
         # even if wait_key is not set. This is good for us as we want to see
         # the error messages
-	sys.exit(1)
+        sys.exit(1)
 else:
     sys.exit(1)
