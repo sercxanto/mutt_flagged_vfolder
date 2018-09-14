@@ -1,4 +1,5 @@
 #!/usr/bin/python
+"""Generates mutt command file to jump to the source of a symlinked mail"""
 #
 #    mutt_flagged_vfolder_jump.py
 #
@@ -28,28 +29,29 @@ import types
 VERSIONSTRING = "0.1"
 
 
-def parseMessageId(file):
-    '''Returns the message id for a given file. It is assumed that file represents a valid RFC822 message'''
+def parse_message_id(file_):
+    '''Returns the message id for a given file.
+    It is assumed that file represents a valid RFC822 message'''
     prog = re.compile("^Message-ID: (.+)", re.IGNORECASE)
-    msgId = ""
-    for line in file:
+    msg_id = ""
+    for line in file_:
        # Stop after Header
         if len(line) < 2:
             break
         result = prog.search(line)
         if type(result) != types.NoneType and len(result.groups()) == 1:
-            msgId = result.groups()[0]
+            msg_id = result.groups()[0]
             break
-    return msgId.strip("<>")
+    return msg_id.strip("<>")
 
 
-def parseMaildir(filename):
+def parse_maildir(filename):
     '''Returns the maildir folder for a given file in a maildir'''
-    (head,tail) = os.path.split(os.path.dirname(filename))
+    (head, tail) = os.path.split(os.path.dirname(filename))
     return head
 
 
-def writeMuttCmdFile(filename, maildir, msgId):
+def write_cmd_file(filename, maildir, msg_id):
     '''Writes a file which can be directly sourced by mutt. The file causes
        mutt to change to the given maildir and search there for the given
        message id. Returns true on success, otherwise false.'''
@@ -60,17 +62,17 @@ def writeMuttCmdFile(filename, maildir, msgId):
 
     cmd = "push \"<change-folder> " + maildir + "<enter>/~i "
     # Helps if matching something like 123@[1.2.3.4]
-    regex = re.escape(msgId)
+    regex = re.escape(msg_id)
     # Replace dollar sign "$" with ".+" as mutt has problems with push
     # commands and a dollar sign followed with a non numeric value e.g. like "$u".
     # This seems to reference a variable and cannot be escaped apparently.
     # Something like "$1" does not oppose problems when escaped.
-    regex = regex.replace("\\$",".+")
+    regex = regex.replace("\\$", ".+")
     # According to mutt manual "4.1 Regular Expressions" backslashes must
     # be quoted for a regular expression in initialization command
-    regex = regex.replace("\\","\\\\\\\\")
+    regex = regex.replace("\\", "\\\\\\\\")
     # For some unknown reason "=" must not be escaped twice
-    regex = regex.replace("\\\\=","=")
+    regex = regex.replace("\\\\=", "=")
     cmd += regex + "<enter>\""
     file.write(cmd)
     file.close()
@@ -104,31 +106,31 @@ try:
 except:
     pass
 
-msgId = parseMessageId(sys.stdin)
-if len(msgId) > 0:
+msg_id = parse_message_id(sys.stdin)
+if len(msg_id) > 0:
     found = False
-    cmdFileWritten = False
+    cmd_file_written = False
     for entry in os.listdir(os.path.join(optVFolder, "cur")):
         entry = os.path.join(optVFolder, "cur", entry)
         if os.path.islink(entry):
-            file = None
+            file_ = None
             try:
-                file = open(entry, "r")
+                file_ = open(entry, "r")
             except:
                 print "Could not open " + entry
-            if type(file) != types.NoneType:
-                msgId2 = parseMessageId(file)
-                file.close()
-                if msgId == msgId2:
+            if type(file_) != types.NoneType:
+                msg_id2 = parse_message_id(file_)
+                file_.close()
+                if msg_id == msg_id2:
                     found = True
                     sourcefile = os.path.realpath(entry)
-                    maildir = parseMaildir(sourcefile)
-                    cmdFileWritten = writeMuttCmdFile(optCmdFile, maildir, msgId)
-                    if not cmdFileWritten:
+                    maildir = parse_maildir(sourcefile)
+                    cmd_file_written = write_cmd_file(optCmdFile, maildir, msg_id)
+                    if not cmd_file_written:
                         print "Could not write to file %s" % optCmdFile
                     break
 
-    if found and cmdFileWritten:
+    if found and cmd_file_written:
         sys.exit(0)
     else:
         if not found:
