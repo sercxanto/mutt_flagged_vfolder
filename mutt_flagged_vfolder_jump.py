@@ -79,65 +79,69 @@ def write_cmd_file(filename, maildir, msg_id):
     return True
 
 
-########### MAIN PROGRAM #############
+def main():
+    '''main function, called when script file is executed directly'''
 
-parser = optparse.OptionParser(
-    usage="%prog [options] vfolder cmdFile",
-    version="%prog " + VERSIONSTRING + os.linesep +
-    "Copyright (C) 2010 Georg Lutz <georg AT NOSPAM georglutz DOT de")
-
-
-(options, args) = parser.parse_args()
-
-if len(args) != 2:
-    parser.print_help()
-    sys.exit(2)
-
-optVFolder = os.path.expanduser(args[0])
-optCmdFile = os.path.expanduser(args[1])
+    parser = optparse.OptionParser(
+        usage="%prog [options] vfolder cmdFile",
+        version="%prog " + VERSIONSTRING + os.linesep +
+        "Copyright (C) 2010 Georg Lutz <georg AT NOSPAM georglutz DOT de")
 
 
-if not os.path.isdir(optVFolder):
-    print "Could not find given vfolder"
-    sys.exit(1)
+    (options, args) = parser.parse_args()
 
-try:
-    os.unlink(optCmdFile)
-except:
-    pass
+    if len(args) != 2:
+        parser.print_help()
+        sys.exit(2)
 
-msg_id = parse_message_id(sys.stdin)
-if len(msg_id) > 0:
-    found = False
-    cmd_file_written = False
-    for entry in os.listdir(os.path.join(optVFolder, "cur")):
-        entry = os.path.join(optVFolder, "cur", entry)
-        if os.path.islink(entry):
-            file_ = None
-            try:
-                file_ = open(entry, "r")
-            except:
-                print "Could not open " + entry
-            if type(file_) != types.NoneType:
-                msg_id2 = parse_message_id(file_)
-                file_.close()
-                if msg_id == msg_id2:
-                    found = True
-                    sourcefile = os.path.realpath(entry)
-                    maildir = parse_maildir(sourcefile)
-                    cmd_file_written = write_cmd_file(optCmdFile, maildir, msg_id)
-                    if not cmd_file_written:
-                        print "Could not write to file %s" % optCmdFile
-                    break
+    optVFolder = os.path.expanduser(args[0])
+    optCmdFile = os.path.expanduser(args[1])
 
-    if found and cmd_file_written:
-        sys.exit(0)
-    else:
-        if not found:
-            print "Could not find given email"
-        # mutt waits for key press if external command returns with code != 0
-        # even if wait_key is not set. This is good for us as we want to see
-        # the error messages
+
+    if not os.path.isdir(optVFolder):
+        print "Could not find given vfolder"
         sys.exit(1)
-else:
-    sys.exit(1)
+
+    try:
+        os.unlink(optCmdFile)
+    except:
+        pass
+
+    msg_id = parse_message_id(sys.stdin)
+    if len(msg_id) > 0:
+        found = False
+        cmd_file_written = False
+        for entry in os.listdir(os.path.join(optVFolder, "cur")):
+            entry = os.path.join(optVFolder, "cur", entry)
+            if os.path.islink(entry):
+                file_ = None
+                try:
+                    file_ = open(entry, "r")
+                except:
+                    print "Could not open " + entry
+                if type(file_) != types.NoneType:
+                    msg_id2 = parse_message_id(file_)
+                    file_.close()
+                    if msg_id == msg_id2:
+                        found = True
+                        sourcefile = os.path.realpath(entry)
+                        maildir = parse_maildir(sourcefile)
+                        cmd_file_written = write_cmd_file(optCmdFile, maildir, msg_id)
+                        if not cmd_file_written:
+                            print "Could not write to file %s" % optCmdFile
+                        break
+
+        if found and cmd_file_written:
+            sys.exit(0)
+        else:
+            if not found:
+                print "Could not find given email"
+            # mutt waits for key press if external command returns with code != 0
+            # even if wait_key is not set. This is good for us as we want to see
+            # the error messages
+            sys.exit(1)
+    else:
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
