@@ -47,7 +47,7 @@ def parse_message_id(file_):
 
 def parse_maildir(filename):
     '''Returns the maildir folder for a given file in a maildir'''
-    (head, tail) = os.path.split(os.path.dirname(filename))
+    (head, _) = os.path.split(os.path.dirname(filename))
     return head
 
 
@@ -56,7 +56,7 @@ def write_cmd_file(filename, maildir, msg_id):
        mutt to change to the given maildir and search there for the given
        message id. Returns true on success, otherwise false.'''
     try:
-        file = open(filename, "w")
+        file_ = open(filename, "w")
     except:
         return False
 
@@ -74,8 +74,8 @@ def write_cmd_file(filename, maildir, msg_id):
     # For some unknown reason "=" must not be escaped twice
     regex = regex.replace("\\\\=", "=")
     cmd += regex + "<enter>\""
-    file.write(cmd)
-    file.close()
+    file_.write(cmd)
+    file_.close()
     return True
 
 
@@ -88,22 +88,22 @@ def main():
         "Copyright (C) 2010 Georg Lutz <georg AT NOSPAM georglutz DOT de")
 
 
-    (options, args) = parser.parse_args()
+    (_, args) = parser.parse_args()
 
     if len(args) != 2:
         parser.print_help()
         sys.exit(2)
 
-    optVFolder = os.path.expanduser(args[0])
-    optCmdFile = os.path.expanduser(args[1])
+    opt_vfolder = os.path.expanduser(args[0])
+    opt_cmd_file = os.path.expanduser(args[1])
 
 
-    if not os.path.isdir(optVFolder):
+    if not os.path.isdir(opt_vfolder):
         print "Could not find given vfolder"
         sys.exit(1)
 
     try:
-        os.unlink(optCmdFile)
+        os.unlink(opt_cmd_file)
     except:
         pass
 
@@ -111,8 +111,8 @@ def main():
     if len(msg_id) > 0:
         found = False
         cmd_file_written = False
-        for entry in os.listdir(os.path.join(optVFolder, "cur")):
-            entry = os.path.join(optVFolder, "cur", entry)
+        for entry in os.listdir(os.path.join(opt_vfolder, "cur")):
+            entry = os.path.join(opt_vfolder, "cur", entry)
             if os.path.islink(entry):
                 file_ = None
                 try:
@@ -126,9 +126,9 @@ def main():
                         found = True
                         sourcefile = os.path.realpath(entry)
                         maildir = parse_maildir(sourcefile)
-                        cmd_file_written = write_cmd_file(optCmdFile, maildir, msg_id)
+                        cmd_file_written = write_cmd_file(opt_cmd_file, maildir, msg_id)
                         if not cmd_file_written:
-                            print "Could not write to file %s" % optCmdFile
+                            print "Could not write to file %s" % opt_cmd_file
                         break
 
         if found and cmd_file_written:
