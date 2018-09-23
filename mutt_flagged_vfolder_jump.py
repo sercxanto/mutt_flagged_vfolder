@@ -5,7 +5,7 @@
 #
 #    Generates mutt command file to jump to the source of a symlinked mail
 #
-#    Copyright (C) 2009 Georg Lutz <georg AT NOSPAM georglutz DOT de>
+#    Copyright (C) 2009-2018 Georg Lutz <georg AT NOSPAM georglutz DOT de>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import optparse
+import argparse
 import os
 import re
 import sys
@@ -82,21 +82,16 @@ def write_cmd_file(filename, maildir, msg_id):
 def main():
     '''main function, called when script file is executed directly'''
 
-    parser = optparse.OptionParser(
-        usage="%prog [options] vfolder cmdFile",
-        version="%prog " + VERSIONSTRING + os.linesep +
-        "Copyright (C) 2010 Georg Lutz <georg AT NOSPAM georglutz DOT de")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('vfolder',
+                    help='The folder with the virtual messages')
+    parser.add_argument('cmdfile',
+                    help='The command file to generate')
 
+    args = parser.parse_args()
 
-    (_, args) = parser.parse_args()
-
-    if len(args) != 2:
-        parser.print_help()
-        sys.exit(2)
-
-    opt_vfolder = os.path.expanduser(args[0])
-    opt_cmd_file = os.path.expanduser(args[1])
-
+    opt_vfolder = os.path.expanduser(args.vfolder)
+    opt_cmd_file = os.path.expanduser(args.cmdfile)
 
     if not os.path.isdir(opt_vfolder):
         print "Could not find given vfolder"
