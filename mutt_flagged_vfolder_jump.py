@@ -84,9 +84,9 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('vfolder',
-                    help='The folder with the virtual messages')
+                        help='The folder with the virtual messages')
     parser.add_argument('cmdfile',
-                    help='The command file to generate')
+                        help='The command file to generate')
 
     args = parser.parse_args()
 
