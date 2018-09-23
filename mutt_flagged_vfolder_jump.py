@@ -26,8 +26,6 @@ import re
 import sys
 import types
 
-VERSIONSTRING = "0.1"
-
 
 def parse_message_id(file_):
     '''Returns the message id for a given file.
@@ -54,11 +52,8 @@ def parse_maildir(filename):
 def write_cmd_file(filename, maildir, msg_id):
     '''Writes a file which can be directly sourced by mutt. The file causes
        mutt to change to the given maildir and search there for the given
-       message id. Returns true on success, otherwise false.'''
-    try:
-        file_ = open(filename, "w")
-    except:
-        return False
+       message id.'''
+    file_ = open(filename, "w")
 
     cmd = "push \"<change-folder> " + maildir + "<enter>/~i "
     # Helps if matching something like 123@[1.2.3.4]
@@ -76,7 +71,6 @@ def write_cmd_file(filename, maildir, msg_id):
     cmd += regex + "<enter>\""
     file_.write(cmd)
     file_.close()
-    return True
 
 
 def main():
@@ -97,10 +91,8 @@ def main():
         print "Could not find given vfolder"
         sys.exit(1)
 
-    try:
+    if os.path.exists(opt_cmd_file):
         os.unlink(opt_cmd_file)
-    except:
-        pass
 
     msg_id = parse_message_id(sys.stdin)
     if len(msg_id) > 0:
@@ -109,22 +101,15 @@ def main():
         for entry in os.listdir(os.path.join(opt_vfolder, "cur")):
             entry = os.path.join(opt_vfolder, "cur", entry)
             if os.path.islink(entry):
-                file_ = None
-                try:
-                    file_ = open(entry, "r")
-                except:
-                    print "Could not open " + entry
-                if type(file_) != types.NoneType:
-                    msg_id2 = parse_message_id(file_)
-                    file_.close()
-                    if msg_id == msg_id2:
-                        found = True
-                        sourcefile = os.path.realpath(entry)
-                        maildir = parse_maildir(sourcefile)
-                        cmd_file_written = write_cmd_file(opt_cmd_file, maildir, msg_id)
-                        if not cmd_file_written:
-                            print "Could not write to file %s" % opt_cmd_file
-                        break
+                file_ = open(entry, "r")
+                msg_id2 = parse_message_id(file_)
+                file_.close()
+                if msg_id == msg_id2:
+                    found = True
+                    sourcefile = os.path.realpath(entry)
+                    maildir = parse_maildir(sourcefile)
+                    write_cmd_file(opt_cmd_file, maildir, msg_id)
+                    break
 
         if found and cmd_file_written:
             sys.exit(0)
