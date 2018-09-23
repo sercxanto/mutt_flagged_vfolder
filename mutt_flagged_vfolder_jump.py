@@ -24,7 +24,6 @@ import argparse
 import os
 import re
 import sys
-import types
 
 
 def parse_message_id(file_):
@@ -37,7 +36,7 @@ def parse_message_id(file_):
         if len(line) < 2:
             break
         result = prog.search(line)
-        if type(result) != types.NoneType and len(result.groups()) == 1:
+        if result != None and len(result.groups()) == 1:
             msg_id = result.groups()[0]
             break
     return msg_id.strip("<>")
